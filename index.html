@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Giải mã Kho báu</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f0;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://picsum.photos/seed/treasure/1200/800.jpg');
+            background-size: cover;
+            background-position: center;
+            color: #fff;
+        }
+        .container {
+            text-align: center;
+            background-color: rgba(0, 0, 0, 0.8);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+            max-width: 800px;
+            width: 90%;
+        }
+        h1 {
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+        p {
+            font-size: 18px;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+        .btn {
+            background-color: #4CAF50;
+            border: none;
+            color: white;
+            padding: 15px 32px;
+            text-align: center;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .btn:hover {
+            background-color: #45a049;
+        }
+        .level-indicator {
+            margin-top: 20px;
+            font-size: 20px;
+            color: #FFD700;
+        }
+        .score {
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        .message-box {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: rgba(255, 255, 255, 0.1);
+            display: none;
+        }
+        .success {
+            background-color: rgba(76, 175, 80, 0.3);
+        }
+        .error {
+            background-color: rgba(244, 67, 54, 0.3);
+        }
+        .clue {
+            margin-top: 10px;
+            font-style: italic;
+            color: #FFD700;
+        }
+        .game-screen {
+            display: none;
+        }
+        .main-menu {
+            display: none;
+        }
+        .login-screen {
+            display: block;
+        }
+        input[type="text"], input[type="password"] {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+            max-width: 300px;
+        }
+        select {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            width: 80%;
+            max-width: 300px;
+        }
+        .cipher-container {
+            margin: 20px 0;
+            text-align: left;
+        }
+        .cipher-title {
+            color: #FFD700;
+            margin-bottom: 10px;
+        }
+        .cipher-text {
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-family: monospace;
+            font-size: 18px;
+            word-wrap: break-word;
+        }
+        .treasure {
+            font-size: 24px;
+            color: #FFD700;
+            animation: glow 2s infinite alternate;
+        }
+        @keyframes glow {
+            from {
+                text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 15px #FFD700, 0 0 20px #FFD700;
+            }
+            to {
+                text-shadow: 0 0 10px #fff, 0 0 15px #FFD700, 0 0 20px #FFD700, 0 0 25px #FFD700;
+            }
+        }
+        .fade-in {
+            animation: fadeIn 0.5s;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        .shake {
+            animation: shake 0.5s;
+        }
+        @keyframes shake {
+            0%, 100% {
+                transform: translateX(0);
+            }
+            10%, 30%, 50%, 70%, 90% {
+                transform: translateX(-10px);
+            }
+            20%, 40%, 60%, 80% {
+                transform: translateX(10px);
+            }
+        }
+        /* Phong cách cho màn hình chiến thắng */
+        .win-screen {
+            display: none;
+            text-align: center;
+        }
+        .win-container {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 0 30px rgba(255, 215, 0, 0.5);
+            animation: winAnimation 1s ease-in-out;
+        }
+        @keyframes winAnimation {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .win-title {
+            font-size: 3rem;
+            color: #FFD700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.7);
+            margin-bottom: 20px;
+            animation: winTitleAnimation 2s infinite alternate;
+        }
+        @keyframes winTitleAnimation {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+        .win-subtitle {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 30px;
+        }
+        .treasure-container {
+            font-size: 4rem;
+            margin: 30px 0;
+            animation: treasureAnimation 2s infinite alternate;
+        }
+        @keyframes treasureAnimation {
+            0% { transform: scale(1) rotate(0deg); }
+            100% { transform: scale(1.2) rotate(5deg); }
+        }
+        .score-container {
+            font-size: 2rem;
+            color: #FFD700;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #FFD700;
+            opacity: 0.7;
+            animation: confetti 5s ease-in-out infinite;
+        }
+        @keyframes confetti {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Màn hình đăng nhập -->
+        <div id="login-screen" class="login-screen">
+            <h1>Giải mã Kho báu</h1>
+            <p>Vui lòng đăng nhập để bắt đầu cuộc phiêu lưu giải mã kho báu!</p>
+            
+            <div class="mb-3">
+                <label for="username" class="form-label">Tên người chơi</label>
+                <input type="text" class="form-control" id="username" placeholder="Nhập tên của bạn">
+            </div>
+            
+            <div class="mb-3">
+                <label for="password" class="form-label">Mật khẩu</label>
+                <input type="password" class="form-control" id="password" placeholder="Nhập mật khẩu">
+            </div>
+            
+            <div id="login-message" class="message-box"></div>
+            
+            <button class="btn" onclick="login()">Đăng nhập</button>
+            <p class="mt-3">Chưa có tài khoản? <a href="#" onclick="showRegisterForm()">Đăng ký</a></p>
+        </div>
+        
+        <!-- Màn hình đăng ký -->
+        <div id="register-screen" class="login-screen" style="display: none;">
+            <h1>Đăng ký</h1>
+            <p>Tạo tài khoản để bắt đầu cuộc phiêu lưu giải mã kho báu!</p>
+            
+            <div class="mb-3">
+                <label for="new-username" class="form-label">Tên người chơi</label>
+                <input type="text" class="form-control" id="new-username" placeholder="Nhập tên của bạn">
+            </div>
+            
+            <div class="mb-3">
+                <label for="new-password" class="form-label">Mật khẩu</label>
+                <input type="password" class="form-control" id="new-password" placeholder="Nhập mật khẩu">
+            </div>
+            
+            <div class="mb-3">
+                <label for="confirm-password" class="form-label">Xác nhận mật khẩu</label>
+                <input type="password" class="form-control" id="confirm-password" placeholder="Nhập lại mật khẩu">
+            </div>
+            
+            <div id="register-message" class="message-box"></div>
+            
+            <button class="btn" onclick="register()">Đăng ký</button>
+            <p class="mt-3">Đã có tài khoản? <a href="#" onclick="showLoginForm()">Đăng nhập</a></p>
+        </div>
+        
+        <!-- Màn hình chính -->
+        <div id="main-menu" class="main-menu">
+            <h1>Giải mã Kho báu</h1>
+            <p>Chào mừng bạn đến với cuộc phiêu lưu giải mã kho báu! Bạn sẽ vào vai một thám tử tài ba, sử dụng kiến thức về các thuật toán mã hóa để giải mã các thông điệp bí ẩn và tìm ra kho báu bị mất.</p>
+            <button class="btn" onclick="startGame()">Bắt đầu trò chơi</button>
+            <div class="score">Điểm: <span id="score">0</span></div>
+        </div>
+        <!-- Màn hình chơi game -->
+        <div id="game-screen" class="game-screen">
+            <h1>Giải mã Kho báu</h1>
+            <div class="level-indicator">Cấp độ <span id="level">1</span></div>
+            <div class="score">Điểm: <span id="current-score">0</span></div>
+            
+            <div class="cipher-container">
+                <h2 class="cipher-title" id="cipher-title">Caesar Cipher</h2>
+                <div class="cipher-text" id="cipher-text"></div>
+                <div id="caesar-inputs" class="cipher-inputs">
+                    <label for="caesar-shift">Độ dịch chuyển:</label>
+                    <input type="number" id="caesar-shift" min="1" max="25" value="3">
+                </div>
+                <div id="vigenere-inputs" class="cipher-inputs" style="display: none;">
+                    <label for="vigenere-key">Từ khóa:</label>
+                    <input type="text" id="vigenere-key" placeholder="Nhập từ khóa">
+                </div>
+                <div id="rsa-inputs" class="cipher-inputs" style="display: none;">
+                    <label for="rsa-private-key">Khóa riêng:</label>
+                    <input type="text" id="rsa-private-key" placeholder="Nhập khóa riêng">
+                </div>
+                <div id="aes-inputs" class="cipher-inputs" style="display: none;">
+                    <label for="aes-key">Khóa AES:</label>
+                    <input type="text" id="aes-key" placeholder="Nhập khóa AES">
+                </div>
+                <button class="btn" onclick="decodeMessage()">Giải mã</button>
+            </div>
+            
+            <div id="message-box" class="message-box"></div>
+            <div id="clue" class="clue"></div>
+            
+            <button class="btn" onclick="backToMenu()" style="margin-top: 20px;">Quay về menu</button>
+        </div>
+        <!-- Màn hình chiến thắng - Cập nhật mới -->
+        <div id="win-screen" class="win-screen">
+            <div class="win-container">
+                <h1 class="win-title">CHÚC MỤC WINNER!</h1>
+                <p class="win-subtitle">Bạn đã hoàn thành xuất sắc cuộc phiêu lưu giải mã kho báu!</p>
+                
+                <div class="treasure-container">
+                    <div class="treasure">💰💎💰</div>
+                </div>
+                
+                <div class="score-container">
+                    Điểm số: <span id="final-score">0</span>
+                </div>
+                
+                <p class="win-message">
+                    Bạn đã giải mã thành công tất cả các thông điệp bí ẩn và tìm ra kho báu bị mất. 
+                    Bằng trí tuệ và bản lĩnh của mình, bạn đã chứng minh mình là một thám tử tài ba!
+                </p>
+                
+                <button class="btn" onclick="restartGame()" style="margin-top: 30px; font-size: 1.2rem;">Chơi lại</button>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Biến game
+        let currentLevel = 1;
+        let score = 0;
+        let currentCipher = '';
+        let currentMessage = '';
+        let currentClue = '';
+        let gameLevels = [
+            {
+                cipher: 'caesar',
+                title: 'Caesar Cipher',
+                message: 'Fdhvdu flskhu lv d whvw phvvdjh',
+                shift: 3,
+                clue: 'Manh mối tiếp theo nằm trong Vigenère Cipher. Từ khóa là "KEY".'
+            },
+            {
+                cipher: 'vigenere',
+                title: 'Vigenère Cipher',
+                message: 'KXGCVI ZRZEX',
+                key: 'KEY',
+                clue: 'Tiếp tục cuộc phiêu lưu với RSA! Khóa riêng là "private123".'
+            },
+            {
+                cipher: 'rsa',
+                title: 'RSA',
+                message: '245 458 634 712 879 123 356 521 834 976 214 345 658 721 312',
+                privateKey: 'private123',
+                clue: 'Cuộc phiêu lưu cuối cùng! Sử dụng AES với khóa "aeskey2023".'
+            },
+            {
+                cipher: 'aes',
+                title: 'AES',
+                message: 'U2FsdGVkX1+7K7J7K7J7K7J7K7J7K7J7K7J7K7J7K7J7K7J7==',
+                key: 'aeskey2023',
+                clue: 'Bạn đã giải mã thành công tất cả các thông điệp và tìm thấy kho báu!'
+            }
+        ];
+        
+        // Biến đăng nhập
+        let users = {};
+        let currentUser = null;
+        
+        // Hàm tạo pháo hoa
+        function createConfetti() {
+            const confettiContainer = document.querySelector('.win-container');
+            const colors = ['#FFD700', '#FF6347', '#32CD32', '#4169E1', '#9932CC'];
+            
+            for (let i = 0; i < 50; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.style.left = `${Math.random() * 100}%`;
+                confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.animationDelay = `${Math.random() * 5}s`;
+                confetti.style.width = `${Math.random() * 10 + 5}px`;
+                confetti.style.height = `${Math.random() * 10 + 5}px`;
+                
+                confettiContainer.appendChild(confetti);
+                
+                // Xóa pháo hoa sau khi animation kết thúc
+                setTimeout(() => {
+                    confetti.remove();
+                }, 5000);
+            }
+        }
+        
+        // Hàm hiển thị màn hình đăng nhập
+        function showLoginForm() {
+            document.getElementById('login-screen').style.display = 'block';
+            document.getElementById('register-screen').style.display = 'none';
+        }
+        
+        // Hàm hiển thị màn hình đăng ký
+        function showRegisterForm() {
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('register-screen').style.display = 'block';
+        }
+        
+        // Hàm đăng ký
+        function register() {
+            const username = document.getElementById('new-username').value;
+            const password = document.getElementById('new-password').value;
+            const confirmPassword = document.getElementById('confirm-password').value;
+            const messageBox = document.getElementById('register-message');
+            
+            if (!username || !password || !confirmPassword) {
+                messageBox.className = 'message-box error';
+                messageBox.textContent = 'Vui lòng điền đầy đủ thông tin!';
+               Box.style.display = 'block';
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                messageBox.className = 'message-box error';
+                messageBox.textContent = 'Mật khẩu không khớp!';
+                messageBox.style.display = 'block';
+                return;
+            }
+            
+            if (users[username]) {
+                messageBox.className = 'message-box error';
+                messageBox.textContent = 'Tên người dùng đã tồn tại!';
+                messageBox.style.display = 'block';
+                return;
+            }
+            
+            // Lưu người dùng mới
+            users[username] = {
+                password: password,
+                score: 0
+            };
+            
+            messageBox.className = 'message-box success';
+            messageBox.textContent = 'Đăng ký thành công! Bạn có thể đăng nhập ngay bây giờ.';
+            messageBox.style.display = 'block';
+            
+            // Reset form
+            document.getElementById('new-username').value = '';
+            document.getElementById('new-password').value = '';
+            document.getElementById('confirm-password').value = '';
+            
+            // Chuyển về màn hình đăng nhập sau 2 giây
+            setTimeout(() => {
+                showLoginForm();
+                messageBox.style.display = 'none';
+            }, 2000);
+        }
+        
+        // Hàm đăng nhập
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const messageBox = document.getElementById('login-message');
+            
+            if (!username || !password) {
+                messageBox.className = 'message-box error';
+                messageBox.textContent = 'Vui lòng điền đầy đủ thông tin!';
+                messageBox.style.display = 'block';
+                return;
+            }
+            
+            if (!users[username]) {
+                messageBox.className = 'message-box error';
+                messageBox.textContent = 'Tên người dùng không tồn tại!';
+                messageBox.style.display = 'block';
+                return;
+            }
+            
+            if (users[username].password !== password) {
+                messageBox.className = 'message-box error';
+                messageBox.textContent = 'Mật khẩu sai!';
+                messageBox.style.display = 'block';
+                return;
+            }
+            
+            // Đăng nhập thành công
+            currentUser = username;
+            score = users[username].score;
+            document.getElementById('score').textContent = score;
+            
+            // Chuyển đến màn hình chính
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+        }
+        
+        // Hàm bắt đầu trò chơi
+        function startGame() {
+            document.getElementById('main-menu').style.display = 'none';
+            document.getElementById('game-screen').style.display = 'block';
+            document.getElementById('win-screen').style.display = 'none';
+            loadLevel(currentLevel);
+        }
+        
+        // Hàm tải cấp độ
+        function loadLevel(level) {
+            const levelData = gameLevels[level - 1];
+            currentCipher = levelData.cipher;
+            currentMessage = levelData.message;
+            currentClue = levelData.clue;
+            
+            document.getElementById('level').textContent = level;
+            document.getElementById('current-score').textContent = score;
+            document.getElementById('cipher-title').textContent = levelData.title;
+            document.getElementById('cipher-text').textContent = currentMessage;
+            
+            // Ẩn tất cả các input
+            document.getElementById('caesar-inputs').style.display = 'none';
+            document.getElementById('vigenere-inputs').style.display = 'none';
+            document.getElementById('rsa-inputs').style.display = 'none';
+            document.getElementById('aes-inputs').style.display = 'none';
+            
+            // Hiển thị input phù hợp với thuật toán mã hóa
+            document.getElementById(`${currentCipher}-inputs`).style.display = 'block';
+            
+            // Ẩn hộp thông báo và manh mối
+            document.getElementById('message-box').style.display = 'none';
+            document.getElementById('clue').textContent = '';
+        }
+        
+        // Hàm giải mã thông điệp
+        function decodeMessage() {
+            let decodedMessage = '';
+            let isCorrect = false;
+            
+            switch(currentCipher) {
+                case 'caesar':
+                    const shift = parseInt(document.getElementById('caesar-shift').value);
+                    decodedMessage = caesarDecode(currentMessage, shift);
+                    isCorrect = (shift === gameLevels[currentLevel - 1].shift);
+                    break;
+                case 'vigenere':
+                    const key = document.getElementById('vigenere-key').value;
+                    decodedMessage = vigenereDecode(currentMessage, key);
+                    isCorrect = (key === gameLevels[currentLevel - 1].key);
+                    break;
+                case 'rsa':
+                    const privateKey = document.getElementById('rsa-private-key').value;
+                    decodedMessage = 'Bạn đã giải mã thành công thông điệp RSA!';
+                    isCorrect = (privateKey === gameLevels[currentLevel - 1].privateKey);
+                    break;
+                case 'aes':
+                    const aesKey = document.getElementById('aes-key').value;
+                    decodedMessage = 'Bạn đã giải mã thành công thông điệp AES và tìm thấy kho báu!';
+                    isCorrect = (aesKey === gameLevels[currentLevel - 1].key);
+                    break;
+            }
+            
+            const messageBox = document.getElementById('message-box');
+            messageBox.style.display = 'block';
+            
+            if (isCorrect) {
+                messageBox.className = 'message-box success';
+                messageBox.textContent = 'Thông điệp đã được giải mã thành công!';
+                document.getElementById('clue').textContent = currentClue;
+                
+                // Cộng điểm
+                score += 100;
+                document.getElementById('current-score').textContent = score;
+                document.getElementById('score').textContent = score;
+                
+                // Kiểm tra xem đã hoàn thành tất cả các cấp độ chưa
+                if (currentLevel < gameLevels.length) {
+                    setTimeout(() => {
+                        currentLevel++;
+                        loadLevel(currentLevel);
+                    }, 3000);
+                } else {
+                    // Trò chơi kết thúc
+                    setTimeout(() => {
+                        document.getElementById('game-screen').style.display = 'none';
+                        document.getElementById('win-screen').style.display = 'block';
+                        document.getElementById('final-score').textContent = score;
+                        createConfetti(); // Tạo pháo hoa khi chiến thắng
+                    }, 3000);
+                }
+            } else {
+                messageBox.className = 'message-box error';
+                messageBox.textContent = 'Giải mã thất bại. Vui lòng thử lại.';
+                document.getElementById('cipher-text').classList.add('shake');
+                setTimeout(() => {
+                    document.getElementById('cipher-text').classList.remove('shake');
+                }, 500);
+            }
+        }
+        
+        // Hàm quay về menu
+        function backToMenu() {
+            document.getElementById('game-screen').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+        }
+        
+        // Hàm chơi lại
+        function restartGame() {
+            currentLevel = 1;
+            score = 0;
+            document.getElementById('score').textContent = score;
+            document.getElementById('win-screen').style.display = 'none';
+            document.getElementById('main-menu').style.display = 'block';
+        }
+        
+        // Các hàm giải mã
+        function caesarDecode(text, shift) {
+            return text.split('').map(char => {
+                const code = char.charCodeAt(0);
+                if (code >= 65 && code <= 90) {
+                    return String.fromCharCode(((code - 65 - shift + 26) % 26) + 65);
+                } else if (code >= 97 && code <= 122) {
+                    return String.fromCharCode(((code - 97 - shift + 26) % 26) + 97);
+                }
+                return char;
+            }).join('');
+        }
+        
+        function vigenereDecode(text, key) {
+            const result = [];
+            let keyIndex = 0;
+            
+            for (let i = 0; i < text.length; i++) {
+                const char = text[i];
+                const code = char.charCodeAt(0);
+                
+                if (code >= 65 && code <= 90) {
+                    const keyChar = key[keyIndex % key.length].toUpperCase();
+                    const keyCode = keyChar.charCodeAt(0) - 65;
+                    const decodedChar = String.fromCharCode(((code - 65 - keyCode + 26) % 26) + 65);
+                    result.push(decodedChar);
+                    keyIndex++;
+                } else if (code >= 97 && code <= 122) {
+                    const keyChar = key[keyIndex % key.length].toLowerCase();
+                    const keyCode = keyChar.charCodeAt(0) - 97;
+                    const decodedChar = String.fromCharCode(((code - 97 - keyCode + 26) % 26) + 97);
+                    result.push(decodedChar);
+                    keyIndex++;
+                } else {
+                    result.push(char);
+                }
+            }
+            
+            return result.join('');
+        }
+        
+        // AES và RSA chỉ là giả lập vì việc giải mã thực tế phức tạp
+        // Trong game này, chúng ta chỉ cần kiểm tra khóa đúng
+    </script>
+</body>
+</html>
